@@ -5,7 +5,8 @@ package com.evaluacion.Utils;
  *
  */
 public class AplicationConstants {
-	public  static final String C_DATO_NO_ENCONTRADO ="No se encontrado registro";
+	public  static final String C_DATO_NO_ENCONTRADO ="No se ha encontrado registro(s)";
+	public  static final String C_ID_INVALIDO="El Id es invalido";
 	public  static final String C_ERROR_UPDATE ="Error al Actualizar Usuario con ID ";
 	public  static final String C_ERROR_DELETE ="Error al Eliminar Usuario con ID: ";
 	public  static final String C_FECHA_FORMAT_1="dd/MM/yyyy";

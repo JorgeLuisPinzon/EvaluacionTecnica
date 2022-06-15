@@ -12,6 +12,7 @@ import com.evaluacion.CustomExceptions.CustomException;
 import com.evaluacion.Dto.*;
 import com.evaluacion.Entity.*;
 import com.evaluacion.Services.*;
+import com.evaluacion.Utils.AplicationConstants;
 
 
 /**
@@ -47,7 +48,7 @@ public class Controlador {
 	public ResponseEntity<?> seleccionarUsuario(@PathVariable(required = true, name="id")  int idUsuario) {
 		if( idUsuario <=0 ) {
 			mapMessage =new HashMap<>();
-			mapMessage.put("message", "El Id es invalido");
+			mapMessage.put("message", AplicationConstants.C_ID_INVALIDO);
 			return new ResponseEntity<Map> (mapMessage, HttpStatus.OK);
 		}else
 			return new ResponseEntity<>(service.seleccionarUsuario(idUsuario), HttpStatus.OK);
@@ -58,7 +59,7 @@ public class Controlador {
 		List<Usuario> datos= service.seleccionarTodo();
 		if( datos.isEmpty() ) {
 			mapMessage =new HashMap<>();
-			mapMessage.put("message", "No se encontraron registros.");
+			mapMessage.put("message", AplicationConstants.C_DATO_NO_ENCONTRADO);
 			return new ResponseEntity<Map> (mapMessage, HttpStatus.OK);
 		}else
 			return new ResponseEntity<>(datos, HttpStatus.OK);
@@ -69,7 +70,7 @@ public class Controlador {
 	public ResponseEntity<?> editarUsuario (@PathVariable(required = true, name="id")  int idUsuario, @Valid @RequestBody UsuarioDto usuario) {
 		if( idUsuario <=0 ) {
 			mapMessage =new HashMap<>();
-			mapMessage.put("message", "El Id es invalido");
+			mapMessage.put("message", AplicationConstants.C_ID_INVALIDO);
 			return new ResponseEntity<Map> (mapMessage, HttpStatus.OK);
 		}else
 			return new ResponseEntity<>(service.actualizarUsuario(usuario,idUsuario), HttpStatus.OK);		
@@ -81,7 +82,7 @@ public class Controlador {
 		mapMessage =new HashMap<>();
 		try {
 		if(idUsuario<=0) 
-			mapMessage.put("message", "El Id es invalido");
+			mapMessage.put("message", AplicationConstants.C_ID_INVALIDO);
 		else { 
 			service.eliminarUsuario(idUsuario);
 			mapMessage.put("message", " Usuario con ID : "+idUsuario+" Fue Eliminado con Exito");
