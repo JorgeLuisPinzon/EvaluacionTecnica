@@ -16,7 +16,6 @@ import javax.persistence.*;
 public class Cuenta {
 	
 	@Id
-	@GeneratedValue(strategy=GenerationType.IDENTITY)
 	private int id;
 
 	private int numeroCuenta;

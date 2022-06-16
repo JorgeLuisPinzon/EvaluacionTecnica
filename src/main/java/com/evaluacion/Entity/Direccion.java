@@ -9,7 +9,6 @@ import javax.persistence.*;
 @Table
 public class Direccion {
 	@Id
-	@GeneratedValue(strategy=GenerationType.IDENTITY )
 	private int id;
 	private String codigoPostal;
 	private String estado;

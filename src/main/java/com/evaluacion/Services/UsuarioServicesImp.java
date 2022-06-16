@@ -1,13 +1,19 @@
 package com.evaluacion.Services;
 
-import java.text.*;
-import java.util.*;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.evaluacion.CustomExceptions.CustomException;
 import com.evaluacion.Dto.UsuarioDto;
+import com.evaluacion.Entity.Cuenta;
+import com.evaluacion.Entity.Direccion;
 import com.evaluacion.Entity.Usuario;
 import com.evaluacion.Repository.UsuarioRepositorio;
 import com.evaluacion.Utils.AplicationConstants;
@@ -19,59 +25,51 @@ public class UsuarioServicesImp implements UsuarioServices{
 	
 	@Autowired
 	UsuarioRepositorio repositorioUsuario;
+	private static byte id_new=0;
 	
 	@Override
 	public Usuario crearUsuario(UsuarioDto usuario) {
 		// TODO Auto-generated method stub
-		ObjectMapper mapper = new ObjectMapper();
-		HashMap<String, Object> finalHashMap;
-		finalHashMap = convertirRequestToString(usuario);
-		mapper.enable(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY);
-		Usuario newEntity = mapper.convertValue(finalHashMap, Usuario.class);
-		
-		Usuario user=repositorioUsuario.save(newEntity);
-		return user;
+		id_new++;
+		Usuario user = convertirObjectSerializable(usuario, id_new);
+		return repositorioUsuario.save(user);
 	}
 
 	@Override
 	public Usuario seleccionarUsuario(int idUsuario) {
 		// TODO Auto-generated method stub
-			Optional<Usuario> usuario=repositorioUsuario.findById(idUsuario);
-			if(!usuario.isPresent()) 
-				throw new CustomException(AplicationConstants.C_DATO_NO_ENCONTRADO);
-			
-			return usuario.get();
+		Optional<Usuario> usuario = repositorioUsuario.findById(idUsuario);
+		if (!usuario.isPresent())
+			throw new CustomException(AplicationConstants.C_DATO_NO_ENCONTRADO);
+
+		return usuario.get();
 
 	}
 	
 	@Override
 	public List<Usuario> seleccionarTodo() {
 		List<Usuario> res = new ArrayList<Usuario>();
-		Iterable<Usuario>  usuarios=repositorioUsuario.findAll();
-		for(Usuario us:usuarios) 
+		Iterable<Usuario> usuarios = repositorioUsuario.findAll();
+		for (Usuario us : usuarios)
 			res.add(us);
-		
+
 		return res;
 	}
 	@Override
 	public Usuario actualizarUsuario(UsuarioDto usuario, int idUsuario) {
 		try {
-			usuario.setId(idUsuario);
-			ObjectMapper mapper = new ObjectMapper();
-			HashMap<String, Object> finalHashMap;
-			finalHashMap = convertirRequestToString(usuario);
-			mapper.enable(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY);
-			Usuario newEntity = mapper.convertValue(finalHashMap, Usuario.class);
-			
-			Usuario usu=repositorioUsuario.findById(newEntity.getId()).get();
-			
-		if(usu!=null) {
-			return repositorioUsuario.save(newEntity);
-		}else
-			throw new CustomException(AplicationConstants.C_DATO_NO_ENCONTRADO);
 
-		}catch(Exception e) {
-			throw new CustomException(AplicationConstants.C_ERROR_UPDATE+usuario.getId());
+			usuario.setId(idUsuario);
+			Usuario usuarioAux = repositorioUsuario.findById(idUsuario).get();
+
+			if (usuarioAux != null) {
+				Usuario newEntity = convertirObjectSerializable(usuario, idUsuario);
+				return repositorioUsuario.save(newEntity);
+			} else
+				throw new CustomException(AplicationConstants.C_DATO_NO_ENCONTRADO);
+
+		} catch (Exception e) {
+			throw new CustomException(AplicationConstants.C_ERROR_UPDATE + usuario.getId());
 		}
 	}
 
@@ -79,23 +77,21 @@ public class UsuarioServicesImp implements UsuarioServices{
 	public void eliminarUsuario(int idUsuario) {
 		// TODO Auto-generated method stub
 		try {
-			Usuario usuario=repositorioUsuario.findById(idUsuario).get();
-			
-			if(usuario!=null)
+			Usuario usuario = repositorioUsuario.findById(idUsuario).get();
+
+			if (usuario != null)
 				repositorioUsuario.delete(usuario);
 			else
 				throw new CustomException(AplicationConstants.C_DATO_NO_ENCONTRADO);
 
-		}
-		catch(Exception e) {
-			throw new CustomException(AplicationConstants.C_ERROR_DELETE+idUsuario);
+		} catch (Exception e) {
+			throw new CustomException(AplicationConstants.C_ERROR_DELETE + idUsuario);
 		}
 	}
-
 	
 	private HashMap<String, Object> convertirRequestToString(UsuarioDto usuario) {
 		// TODO Auto-generated method stub
-		HashMap<String, Object> result = new HashMap<String, Object>() ;
+		HashMap<String, Object> result = new HashMap<String, Object>();
 		result.put("id", usuario.getId());
 		result.put("nombre", usuario.getNombre());
 		result.put("apellidoPaterno", usuario.getApellidoPaterno());
@@ -121,6 +117,26 @@ public class UsuarioServicesImp implements UsuarioServices{
 			} catch (ParseException e) {
 				return false;
 			}
+	}
+	
+	private Usuario convertirObjectSerializable(UsuarioDto usuario, int idUsuario) {
+		Usuario newEntity;
+		try {
+			ObjectMapper mapper = new ObjectMapper();
+			HashMap<String, Object> finalHashMap;
+			finalHashMap = convertirRequestToString(usuario);
+			mapper.enable(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY);
+			newEntity = mapper.convertValue(finalHashMap, Usuario.class);
+			Cuenta ctaNew = newEntity.getCuenta();
+			ctaNew.setId(idUsuario);
+			Direccion direccionNew = newEntity.getDireccion();
+			direccionNew.setId(idUsuario);
+			newEntity.setCuenta(ctaNew);
+			newEntity.setDireccion(direccionNew);
+		} catch (Exception e) {
+			throw new CustomException(AplicationConstants.C_DATO_NO_ENCONTRADO);
+		}
+		return newEntity;
 	}
 	
 	public String validarDatos(String fecha,float ingreso,String numCta,String codPostal) {
